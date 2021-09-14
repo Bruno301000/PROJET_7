@@ -7,22 +7,25 @@ import shap
 import math
 from shap.plots._beeswarm import summary_legacy
 st.set_option('deprecation.showPyplotGlobalUse', False)
+import matplotlib 
 import matplotlib.pyplot as plt
 import numpy as np
 import altair as alt
+import seaborn as sns
+import tkinter 
+import plotly.express as px
+
 
 @st.cache
-def load_data(nrows):
-	data= pd.read_csv('test_df.csv',index_col = [0])
+def load_data():
+	data= pd.read_csv('test_df.csv', index_col = [0])
+	
 	return data
 
-
-
-df_test_rf=load_data(4500)
-
+df_test_rf=load_data()
 
 # rf predictions
-model_rf= joblib.load('RF_model.joblib')
+model_rf= joblib.load('RF_grid_model_v2.joblib')
 
 #df_test_rf= pd.read_csv('test_df.csv',index_col = [0])
 
@@ -39,21 +42,21 @@ st.title("CREDIT SCORING ")
 
 # Informations basiques sur le client
 @st.cache
-def load_data_brut(nrows):
-	data= pd.read_csv('app_test_streamlit.csv')
-	return data
+def load_data_brut():
+	#data_brut= pd.read_csv('app_test_streamlit.csv').sample(50)
+	data_brut= pd.read_csv('app_test_streamlit_v3.csv',index_col = [0])
+	#data_brut.drop('Unnamed: 0', axis=1,inplace=True)
+	return data_brut
 
-df_brut = load_data_brut(4500)
+df_brut =load_data_brut()
+#df_brut.drop('Unnamed: 0', axis=1,inplace=True)
+#df_brut.drop('Unnamed: 0', axis=1,inplace=True)
 #df_brut= pd.read_csv('app_test_streamlit.csv')
 
+st.write(df_brut.head(2))
 st.subheader('Customer basic information')
 
-cust_infos= pd.DataFrame(df_brut.loc[df_brut['SK_ID_CURR']==select_box,['CODE_GENDER','AMT_INCOME_TOTAL','AMT_CREDIT','AMT_ANNUITY']])
-cust_infos['AGE']= (df_brut['DAYS_BIRTH']/-365).astype(int)
-cust_infos['AMT_INCOME_TOTAL']= cust_infos['AMT_INCOME_TOTAL'].astype(int)
-cust_infos['AMT_CREDIT']= cust_infos['AMT_CREDIT'].astype(int)
-cust_infos['AMT_ANNUITY']= cust_infos['AMT_ANNUITY'].astype(int)
-cust_infos['YEARS_EMPLOYED']= (df_brut['DAYS_EMPLOYED']/-365).astype(int)
+cust_infos= pd.DataFrame(df_brut.loc[df_brut['SK_ID_CURR']==select_box,['CODE_GENDER','AGE','YEARS_EMPLOYED','AMT_INCOME_TOTAL','AMT_CREDIT','AMT_ANNUITY']])
 
 st.dataframe(data=cust_infos)
 
@@ -97,6 +100,7 @@ plt.clf()
 model_rf.predict_proba(data_for_prediction_array)
 
 st.subheader('Features importances for the entire model')
+
 feat_importances = pd.Series(model_rf.feature_importances_, index=df_test_rf.columns)
 feat_importances.nlargest(15).plot(kind='barh',figsize=(6,7)).invert_yaxis()
 st.pyplot(feat_importances.nlargest(15).plot(kind='barh').invert_yaxis())
@@ -117,13 +121,34 @@ st.pyplot(shap.summary_plot(shap_value1, df_test_rf))
 st.sidebar.title('Global statistics')
 feat_importances_best15= feat_importances.sort_values(ascending = False)[:15]
 
-feature1 =st.sidebar.subheader("Select Feature n°1 from feature importancces")
-select_box_feature1 =st.sidebar.selectbox("Feature N°1",feat_importances_best15.index)
+#feature1 =st.sidebar.subheader("Select Feature n°1 from feature importancces")
+#select_box_feature1 =st.sidebar.selectbox("Feature N°1",feat_importances_best15.index)
+
+feature1 =st.sidebar.subheader("Select Feature n°1")
+select_box_feature1 =st.sidebar.selectbox("Feature N°1",df_brut.columns)
+
+
+
+#for select_box_feature1 in col_description[0]:
+#	st.text(col_descrition[1])
+
 if st.sidebar.button('select Feature N°1'):
 	st.write('customer choosen',select_box_feature1)
 
-feature2 =st.sidebar.subheader("Select Feature n°2 from feature importancces")
-select_box_feature2 =st.sidebar.selectbox("Feature N°2",feat_importances_best15.index)
+
+
+df_brut=df_brut.sample(frac=0.05)
+for col in df_brut:
+    if (df_brut[col].isna().sum()!=0)&(df_brut[col].dtype =='object'):
+        app_dropped=df_brut.drop(col, axis =1, inplace = True)
+
+for col in df_brut:
+    if (df_brut[col].dtype !='object'):
+        df_brut[[col]]=df_brut[[col]].fillna(df_brut[[col]].median())
+
+
+feature2 =st.sidebar.subheader("Select Feature n°2 from customer basic infos")
+select_box_feature2 =st.sidebar.selectbox("Feature N°2",df_brut.columns.sort_values(ascending=False))
 if st.sidebar.button('select Feature N°2'):
 	st.write('customer choosen',select_box_feature2)
 
@@ -132,23 +157,63 @@ add_selectbox = st.sidebar.selectbox(
     ("Email", "Home phone", "Mobile phone")
 )
 
+# Graphique feature 1
+left_column, right_column = st.columns(2)
 
-st.vega_lite_chart(df_brut, {
-    'mark': {'type': 'circle', 'tooltip': True},
-     'encoding': {
-         'x': {'field': 'select_box_feature1', 'type': 'quantitative'},
- 'y': {'field': 'select_box_feature2', 'type': 'quantitative'},
-         'size': {'field': 'DAYS_BIRTH', 'type': 'quantitative'},
-         'color': {'field': 'DAYS_BIRTH', 'type': 'quantitative'},
-     },
- })
+st.subheader("Histogram feature 1")
+
+fig = plt.figure()
+plt.hist(df_brut[select_box_feature1])
+st.plotly_chart(fig)
 
 
-c = alt.Chart(df_brut).mark_circle().encode(
-     x='select_box_feature1', y='select_box_feature2', size='DAYS_BIRTH',
-      color='DAYS_BIRTH', tooltip=['select_box_feature1', 'select_box_feature2', 'DAYS_BIRTH'])
+fig = px.histogram(df_brut, x=select_box_feature1, color = 'SK_ID_CURR')
+st.plotly_chart(fig)
 
-st.altair_chart(c, use_container_width=True)
+
+#Graphique feature 2
+st.subheader("Histogram feature 2")
+
+#fig = plt.figure()
+#plt.hist(df_brut[select_box_feature2])
+#st.plotly_chart(fig)
+
+
+fig = px.histogram(df_brut, x=select_box_feature2)
+st.plotly_chart(fig)
+
+# Test graphique 2 features 
+st.subheader("Features 1 combines with feature 2")
+
+fig = px.scatter(df_brut, x=select_box_feature1, y=select_box_feature2, color="CODE_GENDER",hover_data=['SK_ID_CURR'])
+st.plotly_chart(fig)
+
+#fig = px.bar(df_brut, x=select_box_feature1, y=select_box_feature2)
+#st.plotly_chart(fig)
+
+st.title("")
+
+
+left_column, right_column = st.columns(2)
+pressed = left_column.button('Press me?')
+if pressed:
+  right_column.write("Woohoo!")
+
+expander = st.expander("FAQ")
+expander.write("Here you could put in some really, really long explanations...")
+
+
+if st.checkbox('Show dataframe'):
+    chart_data = pd.DataFrame(
+       np.random.randn(20, 3),
+       columns=['a', 'b', 'c'])
+
+    chart_data
+#st.dataframe(data=)
+#fig = plt.figure()
+#sns.countplot(x=df_brut['EXT_SOURCE_2'])
+#st.pyplot(fig)
+
 
 
 #fig= plt.hist(df)	
