@@ -117,7 +117,7 @@ y_pred_global= model_rf.predict(df_test_rf)
 y_pred_proba_global = model_rf.predict_proba(df_test_rf)[:,1]
 df_test_rf_pred= df_test_rf.copy()
 df_test_rf_pred['PREDICTED CLASS']=y_pred_global
-df_test_rf_pred['PROBABILITY_%'] = np.round(y_pred_proba_global*100)
+df_test_rf_pred['PROBABILITY_%'] = np.round(y_pred_proba_global*100,1)
 
 fig = px.scatter(df_test_rf_pred, x='SK_ID_CURR', y='PROBABILITY_%', color='PREDICTED CLASS',
 	hover_data=['SK_ID_CURR'],marginal_y ='box')
@@ -141,10 +141,8 @@ st.write("")
 # Global statistics from the dataset
 
 # Creation colonne PROBABILITY_UNPAID_%
-df_brut['PROBABILITY_UNPAID_%']=np.round(df_test_rf_pred['PROBABILITY_%'])
+df_brut['PROBABILITY_UNPAID_%']=np.round(df_test_rf_pred['PROBABILITY_%'],1)
 
-# Sample of df_brut for statistics
-#df_sample=df_brut.sample()
 
 for col in df_brut:
     if (df_brut[col].isna().sum()!=0)&(df_brut[col].dtype =='object'):
@@ -176,7 +174,6 @@ if st.sidebar.button('select Feature N°2'):
 # Graphique feature 1
 left_column, right_column = st.columns(2)
 
-
 with left_column:
 	st.subheader("Histogram feature 1")
 	fig = px.histogram(df_brut, x=select_box_feature1,marginal ='box', barmode ='group',
@@ -185,6 +182,7 @@ with left_column:
 
 
 # Graphique feature 2
+
 with right_column:
 	st.subheader("Histogram feature 2")
 	fig = px.histogram(df_brut, x=select_box_feature2, color = 'CODE_GENDER',marginal ='box',barmode ='group',color_discrete_sequence =['orange','green']*3,
@@ -196,7 +194,6 @@ with right_column:
 st.subheader("Feature N°1  combines with feature N°2 / per Class : prediction to be paid or unpaid" )
 df_brut['PREDICTED_CLASS']=np.round(df_test_rf_pred['PREDICTED CLASS'])
 df_brut['PREDICTED_CLASS']=df_brut['PREDICTED_CLASS'].replace({0:'paid', 1:'unpaid'})
-#df_brut['PROBABILITY_UNPAID_%']=np.round(df_test_rf_pred['PROBABILITY_%'])
 
 fig = px.scatter(df_brut, x=select_box_feature1, y=select_box_feature2, color="PREDICTED_CLASS",hover_data=['SK_ID_CURR','AGE', 'YEARS_EMPLOYED',
 	'AMT_INCOME_TOTAL','AMT_CREDIT','AMT_ANNUITY','PROBABILITY_UNPAID_%'],opacity=0.1,marginal_x='box', marginal_y ='box')
