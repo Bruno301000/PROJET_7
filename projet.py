@@ -62,9 +62,9 @@ y_pred_rf = int(model_rf.predict(df_single_cust))
 y_pred_proba= np.round((float(model_rf.predict_proba(df_single_cust)[:,1])*100),2)
 left_column, right_column = st.columns(2)
 with left_column:
-	if y_pred_proba<=30:
+	if y_pred_proba<=35:
 		st.write(y_pred_proba, '%  :  low probability to be unpaid')
-	elif (y_pred_proba>30) & (y_pred_proba<=49.99):
+	elif (y_pred_proba>35) & (y_pred_proba<=49.99):
 		st.write(y_pred_proba, '%  >  likely to be paid but risks exist')
 	else:
 		st.write(y_pred_proba, '%  > strong risks to be unpaid')
