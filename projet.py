@@ -18,7 +18,7 @@ def load_data():
 df_test_rf=load_data()
 
 # rf predictions
-model_rf= joblib.load('RF_grid_model_v2.joblib')
+model_rf= joblib.load('RF_model.joblib')
 
 list_cust = list(df_test_rf['SK_ID_CURR'])
 
