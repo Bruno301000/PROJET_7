@@ -160,13 +160,13 @@ for col in df_brut:
 st.sidebar.title('Global statistics')
 
 st.subheader('6. Global statistics')
-feature1 =st.sidebar.subheader("Feature n°1 to be choosen")
+feature1 =st.sidebar.subheader("Feature n°1 to be selected")
 select_box_feature1 =st.sidebar.selectbox("",df_brut.columns)
 
 if st.sidebar.button('select Feature N°1'):
 	st.write('Feature N°1 choosen',select_box_feature1)
 
-feature2 =st.sidebar.subheader("Feature n°2 to be choosen")
+feature2 =st.sidebar.subheader("Feature n°2 to be selected")
 select_box_feature2 =st.sidebar.selectbox("",df_brut.columns.sort_values(ascending=False))
 if st.sidebar.button('select Feature N°2'):
 	st.write('Feature N°2 choosen',select_box_feature2)
