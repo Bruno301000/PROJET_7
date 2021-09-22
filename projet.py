@@ -107,10 +107,6 @@ force_plot = shap.force_plot(np.round(explainer.expected_value[1],3),
                     matplotlib=True,
                     show=False)
 
-plt.suptitle(f'Class predicted : {model_rf.classes_[np.argmax(data_for_prediction)]}',
-             fontsize=20,
-             y=1.35)
-
 st.pyplot(force_plot)
 
 
