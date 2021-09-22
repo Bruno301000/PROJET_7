@@ -155,18 +155,18 @@ for col in df_brut:
         df_brut[[col]]=df_brut[[col]].fillna(df_brut[[col]].median())
 
 
-# Feature N°1 and feature N°2 to be choosen
+# Feature N°1 and feature N°2 to select
 
 st.sidebar.title('Global statistics')
 
 st.subheader('6. Global statistics')
-feature1 =st.sidebar.subheader("Feature n°1 to be selected")
+feature1 =st.sidebar.subheader("Feature N°1 to be selected")
 select_box_feature1 =st.sidebar.selectbox("",df_brut.columns)
 
 if st.sidebar.button('select Feature N°1'):
 	st.write('Feature N°1 choosen',select_box_feature1)
 
-feature2 =st.sidebar.subheader("Feature n°2 to be selected")
+feature2 =st.sidebar.subheader("Feature N°2 to be selected")
 select_box_feature2 =st.sidebar.selectbox("",df_brut.columns.sort_values(ascending=False))
 if st.sidebar.button('select Feature N°2'):
 	st.write('Feature N°2 choosen',select_box_feature2)
