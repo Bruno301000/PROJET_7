@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 import shap
 from shap.plots._beeswarm import summary_legacy
 import matplotlib.pyplot as plt
