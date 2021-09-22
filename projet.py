@@ -32,7 +32,7 @@ if st.sidebar.button('select customer'):
 st.title("CREDIT SCORING WEB APPLICATION ")
 
 # Load data app_test_streamlit_v3
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_data_brut():
 	data_brut= pd.read_csv('app_test_streamlit_v3.csv',index_col = [0])
 	return data_brut
